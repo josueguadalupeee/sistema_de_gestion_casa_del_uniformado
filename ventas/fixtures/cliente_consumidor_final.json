@@ -1,0 +1,13 @@
+[
+  {
+    "model": "ventas.cliente",
+    "pk": 1,
+    "fields": {
+      "nombre_cliente": "Consumidor Final",
+      "cedula": "9999999999",
+      "telefono": "",
+      "correo": "",
+      "direccion": ""
+    }
+  }
+]

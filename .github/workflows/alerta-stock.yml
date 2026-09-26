@@ -1,0 +1,16 @@
+name: Alerta diaria de stock
+
+on:
+  schedule:
+    # 01:00 UTC = 20:00 en Ecuador (UTC-5, sin horario de verano)
+    - cron: '0 1 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  disparar-alerta:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar al endpoint de alerta de stock
+        run: |
+          curl -sf --retry 3 --retry-delay 30 \
+            "${{ secrets.APP_URL }}/tareas/alerta-stock/?token=${{ secrets.STOCK_ALERT_TOKEN }}"

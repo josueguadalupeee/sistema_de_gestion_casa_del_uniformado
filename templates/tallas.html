@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Tallas - Uniformes Vanguardia{% endblock %}
+{% block page_title %}Tallas{% endblock %}
+{% block breadcrumb %}<a href="{% url 'inventario' %}" style="color:var(--steel-500);">Inventario</a> · tallas{% endblock %}
+
+{% block topbar_right %}
+<a href="{% url 'talla_nueva' %}" class="pay-btn" style="width:auto; padding:10px 18px; margin:0; text-decoration:none;">+ Nueva talla</a>
+{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Todas las tallas</h2>
+      <div class="hint">Usadas como variante en el inventario</div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Descripción</th><th></th></tr></thead>
+    <tbody>
+      {% for talla in tallas %}
+      <tr>
+        <td>{{ talla.descripcion }}</td>
+        <td>
+          <div class="row-actions">
+            <a href="{% url 'talla_editar' talla.pk %}" class="btn-secondary">Editar</a>
+            <form method="post" action="{% url 'talla_eliminar' talla.pk %}" onsubmit="return confirm('¿Eliminar la talla &quot;{{ talla.descripcion }}&quot;?');">
+              {% csrf_token %}
+              <button type="submit" class="btn-danger">Eliminar</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="2" style="text-align:center; color:var(--ink-soft);">No hay tallas registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

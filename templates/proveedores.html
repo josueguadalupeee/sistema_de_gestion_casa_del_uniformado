@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Proveedores - Uniformes Vanguardia{% endblock %}
+{% block page_title %}Proveedores{% endblock %}
+{% block breadcrumb %}{{ proveedores|length }} proveedores registrados{% endblock %}
+
+{% block topbar_right %}
+<form method="get" class="search" style="width:280px;">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+  <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nombre..." style="border:none; background:transparent; outline:none; width:100%; font-size:13px; color:var(--ink);">
+</form>
+<a href="{% url 'proveedor_nuevo' %}" class="pay-btn" style="width:auto; padding:10px 18px; margin:0; text-decoration:none;">+ Nuevo proveedor</a>
+{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Todos los proveedores</h2>
+      <div class="hint">Nombre y contacto</div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Nombre</th><th>Teléfono</th><th>Dirección</th><th></th></tr></thead>
+    <tbody>
+      {% for proveedor in proveedores %}
+      <tr>
+        <td>{{ proveedor.nombre_proveedor }}</td>
+        <td>{{ proveedor.telefono|default:"-" }}</td>
+        <td>{{ proveedor.direccion|default:"-" }}</td>
+        <td><a href="{% url 'proveedor_editar' proveedor.pk %}" class="btn-secondary">Editar</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" style="text-align:center; color:var(--ink-soft);">No se encontraron proveedores.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

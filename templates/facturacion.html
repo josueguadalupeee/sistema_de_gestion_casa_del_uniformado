@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Nueva factura - Uniformes Vanguardia{% endblock %}
+{% block page_title %}Nueva factura{% endblock %}
+{% block breadcrumb %}Factura #{{ siguiente_numero_factura|stringformat:"04d" }} · en curso{% endblock %}
+
+{% block topbar_right %}
+<div class="icon-btn">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9h12v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="pos-layout">
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Buscar productos</h2>
+        <div class="hint">Escribe nombre, código o escanea</div>
+      </div>
+    </div>
+    <div class="search" style="width:auto; margin:16px 20px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="buscador-producto" placeholder="Camisa policía..." style="border:none; background:transparent; outline:none; width:100%; font-size:13px; color:var(--ink);">
+    </div>
+
+    <div id="resultados-busqueda">
+      {% include "_resultados_busqueda.html" %}
+    </div>
+
+    <hr class="stitch" style="margin:8px 20px;">
+
+    <div class="panel-head" style="border-bottom:none; padding-bottom:8px;">
+      <h2 style="font-size:12.5px;">Historial reciente del cliente</h2>
+    </div>
+    <div style="padding:0 20px 20px 20px; font-size:12px; color:var(--ink-soft);">
+      {% if historial_cliente %}
+        {% for compra in historial_cliente %}
+        <div>{{ compra.fecha|date:"d/m/Y" }} - ${{ compra.total|floatformat:2 }}</div>
+        {% endfor %}
+      {% else %}
+        Sin compras registradas anteriormente para el cliente seleccionado.
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Detalle de venta</h2>
+      <span class="link-btn" id="btn-vaciar-carrito">Vaciar</span>
+    </div>
+
+    <div class="client-select">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <div>
+        <div class="label">Cliente</div>
+        <div class="val">{{ cliente_seleccionado.nombre_cliente|default:"Consumidor Final" }}</div>
+      </div>
+      <a href="{% url 'seleccionar_cliente' %}" class="change">Cambiar</a>
+    </div>
+
+    <div id="carrito-wrapper">
+      {% include "_carrito.html" %}
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCookie(name) {
+  const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return match ? decodeURIComponent(match[2]) : null;
+}
+const csrftoken = getCookie('csrftoken');
+
+const resultadosEl = document.getElementById('resultados-busqueda');
+const carritoEl = document.getElementById('carrito-wrapper');
+const buscadorEl = document.getElementById('buscador-producto');
+
+function bindCarritoEvents() {
+  carritoEl.querySelectorAll('.cart-line').forEach(function (linea) {
+    const inventarioId = linea.dataset.lineaId;
+    const menos = linea.querySelector('.qty-menos');
+    const mas = linea.querySelector('.qty-mas');
+    if (menos) menos.addEventListener('click', function () { actualizarCantidad(inventarioId, -1); });
+    if (mas) mas.addEventListener('click', function () { actualizarCantidad(inventarioId, 1); });
+  });
+}
+bindCarritoEvents();
+
+function bindResultadosEvents() {
+  resultadosEl.querySelectorAll('.pos-search-item').forEach(function (item) {
+    item.addEventListener('click', function () {
+      agregarAlCarrito(item.dataset.inventarioId);
+    });
+  });
+}
+bindResultadosEvents();
+
+let buscarTimeout = null;
+if (buscadorEl) {
+  buscadorEl.addEventListener('input', function () {
+    clearTimeout(buscarTimeout);
+    const q = buscadorEl.value;
+    buscarTimeout = setTimeout(function () {
+      fetch('{% url "buscar_productos" %}?q=' + encodeURIComponent(q))
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+          resultadosEl.innerHTML = html;
+          bindResultadosEvents();
+        });
+    }, 250);
+  });
+}
+
+function agregarAlCarrito(inventarioId) {
+  fetch('{% url "carrito_agregar" %}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+    body: JSON.stringify({ inventario_id: inventarioId }),
+  })
+    .then(function (r) { return r.text(); })
+    .then(function (html) {
+      carritoEl.innerHTML = html;
+      bindCarritoEvents();
+    });
+}
+
+function actualizarCantidad(inventarioId, delta) {
+  fetch('{% url "carrito_actualizar" %}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+    body: JSON.stringify({ inventario_id: inventarioId, delta: delta }),
+  })
+    .then(function (r) { return r.text(); })
+    .then(function (html) {
+      carritoEl.innerHTML = html;
+      bindCarritoEvents();
+    });
+}
+
+document.getElementById('btn-vaciar-carrito').addEventListener('click', function () {
+  fetch('{% url "carrito_vaciar" %}', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': csrftoken },
+  })
+    .then(function (r) { return r.text(); })
+    .then(function (html) {
+      carritoEl.innerHTML = html;
+      bindCarritoEvents();
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Colores - Uniformes Vanguardia{% endblock %}
+{% block page_title %}Colores{% endblock %}
+{% block breadcrumb %}<a href="{% url 'inventario' %}" style="color:var(--steel-500);">Inventario</a> · colores{% endblock %}
+
+{% block topbar_right %}
+<a href="{% url 'color_nuevo' %}" class="pay-btn" style="width:auto; padding:10px 18px; margin:0; text-decoration:none;">+ Nuevo color</a>
+{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Todos los colores</h2>
+      <div class="hint">Usados como variante en el inventario</div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Descripción</th><th></th></tr></thead>
+    <tbody>
+      {% for color in colores %}
+      <tr>
+        <td>{{ color.descripcion }}</td>
+        <td>
+          <div class="row-actions">
+            <a href="{% url 'color_editar' color.pk %}" class="btn-secondary">Editar</a>
+            <form method="post" action="{% url 'color_eliminar' color.pk %}" onsubmit="return confirm('¿Eliminar el color &quot;{{ color.descripcion }}&quot;?');">
+              {% csrf_token %}
+              <button type="submit" class="btn-danger">Eliminar</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="2" style="text-align:center; color:var(--ink-soft);">No hay colores registrados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

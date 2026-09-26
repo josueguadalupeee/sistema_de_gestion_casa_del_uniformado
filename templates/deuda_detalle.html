@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Deuda de {{ deuda.cliente.nombre_cliente }} - Uniformes Vanguardia{% endblock %}
+{% block page_title %}{{ deuda.cliente.nombre_cliente }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'deudores' %}" style="color:var(--steel-500);">Clientes y deudores</a> · deuda #{{ deuda.pk }}{% endblock %}
+
+{% block content %}
+<div class="kpi-row" style="grid-template-columns:repeat(3,1fr); margin-bottom:24px;">
+  <div class="kpi k-navy">
+    <div class="label">Monto total</div>
+    <div class="value">${{ deuda.monto_total|floatformat:2 }}</div>
+  </div>
+  <div class="kpi k-green">
+    <div class="label">Abonado</div>
+    <div class="value">${{ deuda.total_abonado|floatformat:2 }}</div>
+  </div>
+  <div class="kpi k-rust">
+    <div class="label">Saldo pendiente</div>
+    <div class="value">${{ deuda.saldo_pendiente|floatformat:2 }}</div>
+  </div>
+</div>
+
+<div class="panel" style="margin-bottom:20px;">
+  <div class="panel-head">
+    <div>
+      <h2>Qué generó esta deuda</h2>
+      {% if deuda.venta %}
+      <div class="hint">Factura #{{ deuda.venta.pk|stringformat:"04d" }} del {{ deuda.venta.fecha|date:"d/m/Y H:i" }}</div>
+      {% else %}
+      <div class="hint">Deuda registrada manualmente, sin una venta asociada</div>
+      {% endif %}
+    </div>
+    {% if deuda.venta %}<a href="{% url 'venta_detalle' deuda.venta.pk %}" class="link-btn">Ver factura completa &rarr;</a>{% endif %}
+  </div>
+  {% if deuda.venta %}
+  <table>
+    <thead><tr><th>Producto</th><th>Variante</th><th>Cantidad</th><th>Subtotal</th></tr></thead>
+    <tbody>
+      {% for d in deuda.venta.detalles.all %}
+      <tr>
+        <td>{{ d.inventario.producto.nombre_producto }}</td>
+        <td>
+          {% if d.inventario.talla.descripcion != "N/A" %}{{ d.inventario.talla.descripcion }} · {% endif %}{{ d.inventario.color.descripcion }}
+        </td>
+        <td class="mono">{{ d.cantidad }}</td>
+        <td class="mono">${{ d.subtotal|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div style="padding:20px; font-size:13px;">
+    <div style="color:var(--ink-soft); margin-bottom:{% if deuda.descripcion %}10px{% else %}0{% endif %};">
+      Esta deuda no viene de una venta de facturación — se registró directamente desde "Clientes y deudores".
+    </div>
+    {% if deuda.descripcion %}
+    <div style="white-space:pre-line;">{{ deuda.descripcion }}</div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="two-col">
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Abonos registrados</h2>
+        <div class="hint">Deuda desde {{ deuda.fecha_deuda|date:"d/m/Y" }} · estado: {{ deuda.get_estado_display }}</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Fecha</th><th>Monto</th></tr></thead>
+      <tbody>
+        {% for abono in abonos %}
+        <tr>
+          <td>{{ abono.fecha_abono|date:"d/m/Y H:i" }}</td>
+          <td class="mono">${{ abono.monto_abono|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" style="text-align:center; color:var(--ink-soft);">Todavía no hay abonos registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Registrar abono</h2>
+    </div>
+    {% if deuda.saldo_pendiente > 0 %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid full">
+        {% for field in abono_form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">Registrar abono</button>
+      </div>
+    </form>
+    {% else %}
+    <div style="padding:20px; color:var(--green-600); font-size:13px;">Esta deuda ya está saldada.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

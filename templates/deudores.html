@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Clientes y deudores - Uniformes Vanguardia{% endblock %}
+{% block page_title %}Clientes y deudores{% endblock %}
+{% block breadcrumb %}{{ clientes_con_deuda_count|default:"0" }} clientes con saldo pendiente{% endblock %}
+
+{% block topbar_right %}
+<form method="get" class="search" style="width:280px;">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+  <input type="text" name="q" value="{{ q }}" placeholder="Buscar cliente por nombre o cédula..." style="border:none; background:transparent; outline:none; width:100%; font-size:13px; color:var(--ink);">
+</form>
+<a href="{% url 'deuda_nueva' %}" class="pay-btn" style="width:auto; padding:10px 18px; margin:0; text-decoration:none;">+ Nueva deuda</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="kpi-row" style="grid-template-columns:repeat(3,1fr); margin-bottom:24px;">
+  <div class="kpi k-rust">
+    <div class="label">Saldo total pendiente</div>
+    <div class="value">${{ saldo_total_pendiente|floatformat:2 }}</div>
+  </div>
+  <div class="kpi k-gold">
+    <div class="label">Deudas vencidas +30 días</div>
+    <div class="value">{{ deudas_vencidas_count|default:"0" }}</div>
+  </div>
+  <div class="kpi k-green">
+    <div class="label">Abonado este mes</div>
+    <div class="value">${{ abonado_mes_total|floatformat:2 }}</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Cuentas por cobrar</h2>
+      <div class="hint">Ordenado por saldo pendiente</div>
+    </div>
+  </div>
+
+  {% for deuda in deudas %}
+  <a href="{% url 'deuda_detalle' deuda.pk %}" class="debtor-row" style="text-decoration:none; color:inherit;">
+    <div class="debtor-avatar">{{ deuda.cliente.nombre_cliente|slice:":2"|upper }}</div>
+    <div>
+      <div class="debtor-name">{{ deuda.cliente.nombre_cliente }}</div>
+      <div class="debtor-meta">
+        Deuda desde {{ deuda.fecha_deuda|date:"d M" }}
+        · {{ deuda.abonos.count }} abono{{ deuda.abonos.count|pluralize }} registrado{{ deuda.abonos.count|pluralize }}
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:{{ deuda.pct_abonado }}%"></div></div>
+    </div>
+    <div class="debtor-amount">
+      <div class="n">${{ deuda.saldo_pendiente|floatformat:2 }}</div>
+      <div class="d">de ${{ deuda.monto_total|floatformat:2 }}</div>
+    </div>
+  </a>
+  {% empty %}
+  <div style="padding:40px; text-align:center; color:var(--ink-soft); font-size:13px;">No hay deudas registradas.</div>
+  {% endfor %}
+
+</div>
+
+{% endblock %}

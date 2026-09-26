@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Venta #{{ venta.pk|stringformat:"04d" }} - Uniformes Vanguardia{% endblock %}
+{% block page_title %}Factura #{{ venta.pk|stringformat:"04d" }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'ventas' %}" style="color:var(--steel-500);">Ventas</a> · {{ venta.cliente.nombre_cliente }}{% endblock %}
+
+{% block content %}
+<div class="kpi-row" style="grid-template-columns:repeat(4,1fr); margin-bottom:24px;">
+  <div class="kpi k-navy">
+    <div class="label">Cliente</div>
+    <div class="value" style="font-size:16px;">{{ venta.cliente.nombre_cliente }}</div>
+    <div class="delta">Cédula {{ venta.cliente.cedula }}</div>
+  </div>
+  <div class="kpi k-gold">
+    <div class="label">Fecha</div>
+    <div class="value" style="font-size:16px;">{{ venta.fecha|date:"d/m/Y" }}</div>
+    <div class="delta">{{ venta.fecha|time:"H:i" }}</div>
+  </div>
+  <div class="kpi k-green">
+    <div class="label">Estado</div>
+    <div class="value" style="font-size:16px;">
+      {% if venta.estado_pago == "PAGADA" %}
+        <span class="badge paid">Pagada</span>
+      {% else %}
+        <span class="badge pending">Crédito</span>
+      {% endif %}
+    </div>
+    {% if venta.deuda %}<div class="delta down"><a href="{% url 'deuda_detalle' venta.deuda.pk %}" style="color:inherit;">Ver deuda asociada &rarr;</a></div>{% endif %}
+  </div>
+  <div class="kpi k-rust">
+    <div class="label">Total</div>
+    <div class="value">${{ venta.total|floatformat:2 }}</div>
+    <div class="delta">Subtotal ${{ venta.subtotal|floatformat:2 }} + IVA ${{ venta.total_iva|floatformat:2 }}</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Productos comprados</h2>
+      <div class="hint">Detalle de esta factura</div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Producto</th><th>Variante</th><th>Cantidad</th><th>Precio unitario</th><th>IVA</th><th>Subtotal</th></tr></thead>
+    <tbody>
+      {% for d in detalles %}
+      <tr>
+        <td>{{ d.inventario.producto.nombre_producto }} <span class="mono" style="color:var(--ink-soft);">({{ d.inventario.producto.codigo }})</span></td>
+        <td>
+          {% if d.inventario.talla.descripcion != "N/A" %}{{ d.inventario.talla.descripcion }} · {% endif %}{{ d.inventario.color.descripcion }}
+          {% if d.inventario.genero != "NO_APLICA" %} · {{ d.inventario.get_genero_display }}{% endif %}
+        </td>
+        <td class="mono">{{ d.cantidad }}</td>
+        <td class="mono">${{ d.precio_unitario|floatformat:2 }}</td>
+        <td class="mono">${{ d.iva|floatformat:2 }}</td>
+        <td class="mono">${{ d.subtotal|floatformat:2 }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center; color:var(--ink-soft);">Esta venta no tiene líneas registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

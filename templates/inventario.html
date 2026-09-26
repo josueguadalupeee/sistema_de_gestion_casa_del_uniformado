@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Inventario - Uniformes Vanguardia{% endblock %}
+{% block page_title %}Inventario{% endblock %}
+{% block breadcrumb %}{{ productos_total|default:"0" }} productos · {{ productos_stock_bajo_count|default:"0" }} con stock bajo{% endblock %}
+
+{% block topbar_right %}
+<form method="get" class="search" style="width:280px;">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+  <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nombre o código..." style="border:none; background:transparent; outline:none; width:100%; font-size:13px; color:var(--ink);">
+  <input type="hidden" name="categoria" value="{{ categoria_activa|default:'' }}">
+  <input type="hidden" name="seccion" value="{{ seccion_activa|default:'' }}">
+  <input type="hidden" name="stock" value="{{ stock_filtro|default:'' }}">
+</form>
+<a href="{% url 'producto_nuevo' %}" class="pay-btn" style="width:auto; padding:10px 18px; margin:0; text-decoration:none;">+ Nuevo producto</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="filters-row">
+  <a href="?categoria=&seccion={{ seccion_activa|default:'' }}&stock={{ stock_filtro|default:'' }}&q={{ q|urlencode }}" class="pill {% if not categoria_activa %}active{% endif %}">Todos</a>
+  {% for cat in categorias %}
+  <a href="?categoria={{ cat.pk }}&seccion={{ seccion_activa|default:'' }}&stock={{ stock_filtro|default:'' }}&q={{ q|urlencode }}" class="pill {% if categoria_activa == cat.pk %}active{% endif %}">{{ cat.nombre_categoria }}</a>
+  {% endfor %}
+  <form method="get" class="select-fake" style="padding:0;">
+    <input type="hidden" name="categoria" value="{{ categoria_activa|default:'' }}">
+    <input type="hidden" name="q" value="{{ q }}">
+    <select name="seccion" onchange="this.form.submit()" style="border:none; background:transparent; font-size:12.5px; color:var(--ink); padding:7px 12px;">
+      <option value="">Sección: Todas</option>
+      {% for sec in secciones %}
+      <option value="{{ sec.pk }}" {% if seccion_activa == sec.pk %}selected{% endif %}>{{ sec.nombre_seccion }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  <form method="get" class="select-fake" style="padding:0;">
+    <input type="hidden" name="categoria" value="{{ categoria_activa|default:'' }}">
+    <input type="hidden" name="q" value="{{ q }}">
+    <select name="stock" onchange="this.form.submit()" style="border:none; background:transparent; font-size:12.5px; color:var(--ink); padding:7px 12px;">
+      <option value="">Stock: Todos</option>
+      <option value="bajo" {% if stock_filtro == "bajo" %}selected{% endif %}>Stock bajo</option>
+      <option value="ok" {% if stock_filtro == "ok" %}selected{% endif %}>Disponible</option>
+    </select>
+  </form>
+</div>
+
+<div class="grid-products">
+  {% for producto in productos %}
+  <a href="{% url 'producto_detalle' producto.pk %}" class="pcard" style="text-decoration:none; color:inherit; display:block;">
+    <div class="pcard-img">
+      {% if producto.imagen %}
+        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre_producto }}" style="width:100%; height:100%; object-fit:cover;">
+      {% else %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+      {% endif %}
+      {% if producto.stock_total <= producto.stock_minimo_referencia %}
+        <span class="pcard-stock low">Bajo</span>
+      {% else %}
+        <span class="pcard-stock ok">{{ producto.stock_total }} uds</span>
+      {% endif %}
+    </div>
+    <div class="pcard-body">
+      <div class="pcard-cat">{{ producto.categoria.nombre_categoria }}</div>
+      <div class="pcard-name">{{ producto.nombre_producto }}</div>
+      <div class="pcard-variants">
+        {% for variante in producto.variantes_disponibles %}
+        <span class="vchip">{{ variante }}</span>
+        {% endfor %}
+      </div>
+      <div class="pcard-foot">
+        <span class="pcard-price">${{ producto.precio_producto|floatformat:2 }}</span>
+        <span class="pcard-code">{{ producto.codigo }}</span>
+      </div>
+    </div>
+  </a>
+  {% empty %}
+  <div class="panel" style="grid-column: 1 / -1; padding:40px; text-align:center; color:var(--ink-soft); font-size:13px;">
+    No se encontraron productos con esos filtros.
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

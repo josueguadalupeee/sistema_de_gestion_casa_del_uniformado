@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Panel general - Uniformes Vanguardia{% endblock %}
+{% block page_title %}Panel general{% endblock %}
+{% block breadcrumb %}{{ fecha_hoy|date:"l, j \d\e F" }} - resumen del día{% endblock %}
+
+{% block topbar_right %}{% endblock %}
+
+{% block content %}
+
+<div class="kpi-row">
+  <div class="kpi k-navy">
+    <div class="label">Ventas de hoy</div>
+    <div class="value">${{ ventas_hoy_total|floatformat:2 }}</div>
+    <div class="delta">{{ ventas_hoy_variacion_pct|default:"0" }}% vs. ayer</div>
+  </div>
+  <div class="kpi k-gold">
+    <div class="label">Productos por restockear</div>
+    <div class="value">{{ productos_stock_bajo_count|default:"0" }}</div>
+    <div class="delta down">{{ productos_stock_critico_count|default:"0" }} en estado crítico</div>
+  </div>
+  <div class="kpi k-rust">
+    <div class="label">Deuda total pendiente</div>
+    <div class="value">${{ deuda_total_pendiente|floatformat:2 }}</div>
+    <div class="delta down">{{ clientes_con_deuda_count|default:"0" }} clientes con saldo</div>
+  </div>
+  <div class="kpi k-green">
+    <div class="label">Ventas del mes</div>
+    <div class="value">${{ ventas_mes_total|floatformat:2 }}</div>
+    <div class="delta">{{ ventas_mes_variacion_pct|default:"0" }}% vs. mes anterior</div>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Ventas recientes</h2>
+        <div class="hint">Últimas facturas emitidas</div>
+      </div>
+      <a href="{% url 'ventas' %}" class="link-btn">Ver todas &rarr;</a>
+    </div>
+    <table>
+      <thead><tr><th>Factura</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Hora</th></tr></thead>
+      <tbody>
+        {% for venta in ventas_recientes %}
+        <tr>
+          <td class="mono">#{{ venta.pk|stringformat:"04d" }}</td>
+          <td>{{ venta.cliente.nombre_cliente }}</td>
+          <td class="mono">${{ venta.total|floatformat:2 }}</td>
+          <td>
+            {% if venta.cliente.nombre_cliente == "Consumidor Final" %}
+              <span class="badge consumidor">Sin datos</span>
+            {% elif venta.estado_pago == "PAGADA" %}
+              <span class="badge paid">Pagada</span>
+            {% else %}
+              <span class="badge pending">Crédito</span>
+            {% endif %}
+          </td>
+          <td>{{ venta.fecha|time:"H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" style="text-align:center; color:var(--ink-soft);">Aún no hay ventas registradas hoy.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Alertas de stock</h2>
+        <div class="hint">Umbral mínimo por variante</div>
+      </div>
+    </div>
+    {% for item in alertas_stock %}
+    <div class="alert-row">
+      <div class="patch {% if item.stock <= 1 %}crit{% else %}warn{% endif %}">{{ item.stock }}</div>
+      <div class="alert-info">
+        <div class="name">{{ item.producto.nombre_producto }} {{ item.talla.descripcion }} - {{ item.color.descripcion }}</div>
+        <div class="meta">Sección: {{ item.seccion.nombre_seccion }} · SKU {{ item.producto.codigo }}</div>
+      </div>
+      <a href="{% url 'producto_detalle' item.producto.pk %}" class="mini-btn">Restockear</a>
+    </div>
+    {% empty %}
+    <div class="alert-row"><div class="alert-info"><div class="meta">No hay productos por debajo del stock mínimo.</div></div></div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

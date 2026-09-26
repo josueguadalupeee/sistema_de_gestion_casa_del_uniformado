@@ -1,0 +1,35 @@
+<div id="carrito-lineas">
+  {% for linea in carrito_lineas %}
+  <div class="cart-line" data-linea-id="{{ linea.inventario.pk }}">
+    <div class="qty-box">
+      <button type="button" class="qty-menos">-</button>
+      <span class="n">{{ linea.cantidad }}</span>
+      <button type="button" class="qty-mas">+</button>
+    </div>
+    <div>
+      <div class="cart-line-name">{{ linea.inventario.producto.nombre_producto }} {{ linea.inventario.talla.descripcion }} - {{ linea.inventario.color.descripcion }}</div>
+      <div class="cart-line-meta">${{ linea.precio_unitario|floatformat:2 }} c/u · {% if linea.inventario.producto.iva_aplica %}+ IVA{% else %}sin IVA{% endif %}</div>
+    </div>
+    <div class="cart-line-total">${{ linea.subtotal|floatformat:2 }}</div>
+  </div>
+  {% empty %}
+  <div style="padding:24px 20px; text-align:center; color:var(--ink-soft); font-size:12.5px;">Aún no has agregado productos a esta venta.</div>
+  {% endfor %}
+</div>
+
+<hr class="stitch" style="margin:4px 20px;">
+
+<div class="totals-box">
+  <div class="trow"><span>Subtotal</span><span class="mono" id="carrito-subtotal">${{ carrito_subtotal|default:0|floatformat:2 }}</span></div>
+  <div class="trow"><span>IVA (15%)</span><span class="mono" id="carrito-iva">${{ carrito_iva|default:0|floatformat:2 }}</span></div>
+  <div class="trow total"><span>Total</span><span class="mono" id="carrito-total">${{ carrito_total|default:0|floatformat:2 }}</span></div>
+
+  <form method="post" action="{% url 'confirmar_venta' %}">
+    {% csrf_token %}
+    <button type="submit" class="pay-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9h12v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
+      Cobrar ${{ carrito_total|default:0|floatformat:2 }}
+    </button>
+    <button type="submit" name="registrar_como_deuda" value="1" class="pay-alt">Registrar como deuda del cliente</button>
+  </form>
+</div>

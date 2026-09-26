@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Facturas de proveedor - Uniformes Vanguardia{% endblock %}
+{% block page_title %}Facturas de proveedor{% endblock %}
+{% block breadcrumb %}{{ facturas|length }} facturas registradas{% endblock %}
+
+{% block topbar_right %}
+<a href="/admin/compras/facturaproveedor/add/" class="pay-btn" style="width:auto; padding:10px 18px; margin:0; text-decoration:none;">+ Nueva factura</a>
+{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Compras a proveedores</h2>
+      <div class="hint">Cada línea suma stock al inventario de su variante</div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Factura</th><th>Proveedor</th><th>Fecha</th><th>Líneas</th><th>Monto total</th></tr></thead>
+    <tbody>
+      {% for factura in facturas %}
+      <tr>
+        <td class="mono">#{{ factura.pk|stringformat:"04d" }}</td>
+        <td>{{ factura.proveedor.nombre_proveedor }}</td>
+        <td>{{ factura.fecha|date:"d/m/Y" }}</td>
+        <td class="mono">{{ factura.detalles.count }}</td>
+        <td class="mono">${{ factura.monto_total|floatformat:2 }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" style="text-align:center; color:var(--ink-soft);">Todavía no hay facturas de proveedor registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

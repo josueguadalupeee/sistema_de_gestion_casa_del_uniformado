@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ producto.nombre_producto }} - Uniformes Vanguardia{% endblock %}
+{% block page_title %}{{ producto.nombre_producto }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'inventario' %}" style="color:var(--steel-500);">Inventario</a> · SKU {{ producto.codigo }}{% endblock %}
+
+{% block content %}
+
+<div class="panel" style="margin-bottom:20px;">
+  <div class="panel-head">
+    <div>
+      <h2>Datos del producto</h2>
+      <div class="hint">Editar no afecta facturas ya emitidas: quedan con los datos con los que se vendieron</div>
+    </div>
+  </div>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-grid">
+      {% for field in producto_form %}
+      <div class="field {% if field.field.widget.input_type == 'checkbox' %}checkbox-row{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="form-actions">
+      <button type="submit" name="editar_producto" value="1" class="btn-primary">Guardar cambios del producto</button>
+    </div>
+  </form>
+</div>
+
+<div class="two-col">
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Variantes por talla, color y sección</h2>
+        <div class="hint">Stock total: {{ producto.stock_total }} uds · Precio base ${{ producto.precio_producto|floatformat:2 }}</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Talla</th><th>Género</th><th>Color</th><th>Sección</th><th>Stock</th><th>Mínimo</th></tr></thead>
+      <tbody>
+        {% for v in variantes %}
+        <tr>
+          <td>{{ v.talla.descripcion }}</td>
+          <td>{{ v.get_genero_display }}</td>
+          <td>{{ v.color.descripcion }}</td>
+          <td>{{ v.seccion.nombre_seccion }}</td>
+          <td class="mono">{{ v.stock }}</td>
+          <td class="mono">{{ v.stock_minimo }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center; color:var(--ink-soft);">Este producto todavía no tiene variantes registradas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Agregar variante</h2>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid full">
+        {% for field in inventario_form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}
+          {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="form-actions">
+        <button type="submit" name="agregar_variante" value="1" class="btn-primary">Agregar al inventario</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

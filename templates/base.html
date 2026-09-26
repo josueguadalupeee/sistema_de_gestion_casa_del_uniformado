@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Uniformes Vanguardia{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="mark">C</div>
+      <div class="name">Casa del&nbsp;Uniformado</div>
+      <div class="sub">Sistema de inventario</div>
+    </div>
+    <div class="nav">
+      <div class="nav-label">Operación</div>
+
+      <a href="{% url 'dashboard' %}" class="nav-item {% if active_view == 'dashboard' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Panel general
+      </a>
+
+      <a href="{% url 'facturacion' %}" class="nav-item {% if active_view == 'facturacion' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.6 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+        Facturación
+      </a>
+
+      <a href="{% url 'ventas' %}" class="nav-item {% if active_view == 'ventas' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        Ventas
+      </a>
+
+      <div class="nav-group {% if active_view == 'inventario' or active_view == 'tallas' or active_view == 'colores' or active_view == 'secciones' %}open has-active{% endif %}">
+        <button type="button" class="nav-toggle" data-nav-toggle>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3"/><path d="M3 8h18l-1.5 11a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2z"/><path d="M9 12h6"/></svg>
+          Inventario
+          {% if productos_stock_bajo_count %}<span class="nav-badge">{{ productos_stock_bajo_count }}</span>{% endif %}
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <div class="nav-submenu">
+          <a href="{% url 'inventario' %}" class="nav-subitem {% if active_view == 'inventario' %}active{% endif %}">Ver inventario</a>
+          <a href="{% url 'tallas' %}" class="nav-subitem {% if active_view == 'tallas' %}active{% endif %}">Tallas</a>
+          <a href="{% url 'colores' %}" class="nav-subitem {% if active_view == 'colores' %}active{% endif %}">Colores</a>
+          <a href="{% url 'secciones' %}" class="nav-subitem {% if active_view == 'secciones' %}active{% endif %}">Secciones</a>
+        </div>
+      </div>
+
+      <a href="{% url 'clientes' %}" class="nav-item {% if active_view == 'clientes' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Clientes
+      </a>
+
+      <a href="{% url 'deudores' %}" class="nav-item {% if active_view == 'deudores' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Deudores
+      </a>
+
+      <div class="nav-label">Catálogo</div>
+      <a href="{% url 'categorias' %}" class="nav-item {% if active_view == 'categorias' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.2L3 3v6.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.59-4.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+        Categorías
+      </a>
+      <a href="{% url 'proveedores' %}" class="nav-item {% if active_view == 'proveedores' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Proveedores
+      </a>
+
+      <div class="nav-label">Compras</div>
+      <a href="{% url 'facturas_proveedor' %}" class="nav-item {% if active_view == 'facturas_proveedor' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Facturas proveedor
+      </a>
+
+      <div class="nav-label">Sistema</div>
+      <a href="{% url 'configuracion' %}" class="nav-item {% if active_view == 'config' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+    <div class="sidebar-foot">
+      <div class="avatar">{{ request.user.username|slice:":2"|upper|default:"JQ" }}</div>
+      <div>
+        <div class="who">{{ request.user.get_full_name|default:request.user.username|default:"Invitado" }}</div>
+        <div class="role">Administrador</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1>{% block page_title %}{% endblock %}</h1>
+        <div class="breadcrumb">{% block breadcrumb %}{% endblock %}</div>
+      </div>
+      <div class="topbar-right">
+        {% block topbar_right %}
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          Buscar...
+        </div>
+        {% endblock %}
+      </div>
+    </div>
+    <div class="content">
+      {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}{% endblock %}
+<script>
+document.querySelectorAll('[data-nav-toggle]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    btn.closest('.nav-group').classList.toggle('open');
+  });
+});
+</script>
+</body>
+</html>

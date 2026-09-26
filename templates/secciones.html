@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Secciones - Uniformes Vanguardia{% endblock %}
+{% block page_title %}Secciones{% endblock %}
+{% block breadcrumb %}<a href="{% url 'inventario' %}" style="color:var(--steel-500);">Inventario</a> · secciones{% endblock %}
+
+{% block topbar_right %}
+<a href="{% url 'seccion_nueva' %}" class="pay-btn" style="width:auto; padding:10px 18px; margin:0; text-decoration:none;">+ Nueva sección</a>
+{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Todas las secciones</h2>
+      <div class="hint">Policía, Tránsito, Bomberos, Guardias, etc.</div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Nombre</th><th></th></tr></thead>
+    <tbody>
+      {% for seccion in secciones %}
+      <tr>
+        <td>{{ seccion.nombre_seccion }}</td>
+        <td>
+          <div class="row-actions">
+            <a href="{% url 'seccion_editar' seccion.pk %}" class="btn-secondary">Editar</a>
+            <form method="post" action="{% url 'seccion_eliminar' seccion.pk %}" onsubmit="return confirm('¿Eliminar la sección &quot;{{ seccion.nombre_seccion }}&quot;?');">
+              {% csrf_token %}
+              <button type="submit" class="btn-danger">Eliminar</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="2" style="text-align:center; color:var(--ink-soft);">No hay secciones registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

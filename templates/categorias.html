@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Categorías - Uniformes Vanguardia{% endblock %}
+{% block page_title %}Categorías{% endblock %}
+{% block breadcrumb %}{{ categorias|length }} categorías registradas{% endblock %}
+
+{% block topbar_right %}
+<form method="get" class="search" style="width:280px;">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+  <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nombre..." style="border:none; background:transparent; outline:none; width:100%; font-size:13px; color:var(--ink);">
+</form>
+<a href="{% url 'categoria_nueva' %}" class="pay-btn" style="width:auto; padding:10px 18px; margin:0; text-decoration:none;">+ Nueva categoría</a>
+{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Todas las categorías</h2>
+      <div class="hint">Usadas para clasificar productos en el inventario</div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Nombre</th><th>Descripción</th><th></th></tr></thead>
+    <tbody>
+      {% for categoria in categorias %}
+      <tr>
+        <td>{{ categoria.nombre_categoria }}</td>
+        <td>{{ categoria.descripcion|default:"-" }}</td>
+        <td><a href="{% url 'categoria_editar' categoria.pk %}" class="btn-secondary">Editar</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3" style="text-align:center; color:var(--ink-soft);">No se encontraron categorías.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

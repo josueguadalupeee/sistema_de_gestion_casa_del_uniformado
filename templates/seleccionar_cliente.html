@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Seleccionar cliente - Uniformes Vanguardia{% endblock %}
+{% block page_title %}Seleccionar cliente{% endblock %}
+{% block breadcrumb %}<a href="{% url 'facturacion' %}" style="color:var(--steel-500);">Facturación</a> · cliente{% endblock %}
+
+{% block content %}
+<div class="two-col">
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Buscar cliente existente</h2>
+        <div class="hint">Por nombre o cédula</div>
+      </div>
+    </div>
+    <form method="get" style="padding:16px 20px;">
+      <div class="search" style="width:100%;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" name="q" value="{{ q }}" placeholder="Nombre o cédula..." style="border:none; background:transparent; outline:none; width:100%; font-size:13px; color:var(--ink);">
+      </div>
+    </form>
+    <table>
+      <thead><tr><th>Nombre</th><th>Cédula</th><th>Teléfono</th><th></th></tr></thead>
+      <tbody>
+        {% for cliente in clientes %}
+        <tr>
+          <td>{{ cliente.nombre_cliente }}</td>
+          <td class="mono">{{ cliente.cedula }}</td>
+          <td>{{ cliente.telefono|default:"-" }}</td>
+          <td>
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="cliente_id" value="{{ cliente.pk }}">
+              <button type="submit" class="btn-secondary">Seleccionar</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center; color:var(--ink-soft);">No se encontraron clientes.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Registrar cliente nuevo</h2>
+        <div class="hint">Se selecciona automáticamente para esta venta</div>
+      </div>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid full">
+        {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="form-actions">
+        <button type="submit" name="crear_cliente" value="1" class="btn-primary">Crear y seleccionar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
